@@ -1,6 +1,8 @@
 package main
 
-import "github.com/pquerna/ffjson/ffjson"
+import (
+	"gopkg.in/gin-gonic/gin.v1"
+)
 
 type webhook struct {
 	// 镜像名称
@@ -36,7 +38,7 @@ type webhookAliyunData struct {
 		Digest   string `json:"digest"`
 		PushTime string `json:"pushed_at"`
 		Tag      string `json:"tag"`
-	}
+	} `json:"push_data"`
 	Repo struct {
 		CreateTime     string `json:"date_created"`
 		Name           string `json:"name"`
@@ -46,17 +48,17 @@ type webhookAliyunData struct {
 		RepoFullName   string `json:"repo_full_name"`
 		RepoOriginType string `json:"repo_origin_type"`
 		RepoType       string `json:"repo_type"`
-	}
+	} `json:"repository"`
 }
 
 // 解析内容
 // 会将阿里云webhook推送的内容进行解析，如果解析失败将会返回error
-func (w *webhook) Parse(data []byte) (err error) {
+func (w *webhook) Parse(ctx *gin.Context) (err error) {
 	var (
 		originData webhookAliyunData
 	)
 
-	if err = ffjson.Unmarshal(data, &originData); err != nil {
+	if err = ctx.BindJSON(&originData); err != nil {
 		return
 	}
 
